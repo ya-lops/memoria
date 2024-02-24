@@ -73,10 +73,18 @@ const size = data.length / 4;
         sfxOpen.currentTime = 0;
         sfxClear.pause();
         sfxClear.currentTime = 0;
+        
+        
+        if (pair.length == 2) {
+          flipped.forEach((i) => (i.flipped = false));
+          flipped = [];
+          pair = [];
+        }
+        
+        this.flipped = !this.flipped;
+        sfxOpen.play();
 
         if (pair.length < 2) {
-          this.flipped = !this.flipped;
-          sfxOpen.play();
           flipped.push(this);
           pair.push(this.$el.dataset.pair);
 
