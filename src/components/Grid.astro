@@ -1,0 +1,127 @@
+---
+import frameworksData from "@/data/frameworks.ts";
+
+
+// const pairs = data/2;
+
+const { data } = Astro.props;
+const size = data.length / 4;
+---
+
+<div class="game" x-data="memoria()">
+  <div class="grid">
+    {
+      data.map((i) => (
+        <div
+          class="card"
+          data-pair={i.pair}
+          x-data="{flipped: false, cleared: false, }"
+          x-bind:class="{'flipped':flipped, 'cleared':cleared}"
+          x-on:click="flipCard()"
+        >
+          {
+            frameworksData.map(icon => (
+              icon.id == i.pair ? <img src={icon.href}/> : ''
+            ))
+          }
+        </div>
+      ))
+    }
+  </div>
+  
+</div>
+
+<script is:inline>
+  let sfxOpen = new Audio("/sfx/open.wav");
+  let sfxClear = new Audio("/sfx/clear.wav");
+
+  function memoria() {
+    let pair = [];
+    let flipped = [];
+
+    return {
+      flipCard() {
+        if (pair.length < 2) {
+          this.flipped = !this.flipped;
+          sfxOpen.play();
+          flipped.push(this);
+          pair.push(this.$el.dataset.pair);
+
+          if (pair[0] === pair[1]) {
+            flipped.forEach((i) => (i.cleared = true));
+            flipped = [];
+            pair = [];
+            sfxClear.play();
+          }
+
+          if (pair[0] != pair[1] && pair.length > 1) {
+            console.log('no pair')
+          }
+
+        } else {
+          flipped.forEach((i) => (i.flipped = false));
+          flipped = [];
+          pair = [];
+        }
+      },
+    };
+  }
+</script>
+
+<style lang="scss" define:vars={{ size }}>
+  .grid {
+    display: inline-grid;
+    grid-template-columns: repeat(var(--size), minmax(32px, 128px));
+    grid-auto-rows: minmax(32px, 128px);
+    background: #ccc;
+    gap: 1px;
+    border: 1px solid #ccc;
+
+    .card {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #fff;
+      cursor: pointer;
+      transition: 0.25s;
+      user-select: none;
+
+      img {
+        opacity: 0;
+      }
+
+      img {
+        max-width: 75%;
+      }
+
+      &:hover {
+        border: 1px solid red;
+      }
+
+      &.flipped {
+        opacity: 1 !important;
+        color: #000 !important;
+        font-size: 2rem;
+        font-weight: bold;
+        pointer-events: none;
+
+        img {
+          opacity: 1;
+        }
+      }
+
+      &.cleared {
+        pointer-events: none;
+
+        img {
+          opacity: .1;
+        }
+      }
+
+      &:hover {
+        z-index: 1;
+        outline: 2px solid orange;
+      }
+    }
+  }
+</style>

@@ -1,0 +1,35 @@
+---
+import Memoria from "@/layouts/Memoria.astro";
+import Grid from "@/components/Grid.astro";
+
+function makeArr(length) {
+  var n = length;
+  var arr = [];
+  for (var i = 1; i <= n; i++) arr.push({ pair: i, value: i });
+  return arr;
+}
+
+function shuffleArray(arr) {
+  let currentIndex = arr.length,
+    randomIndex;
+  while (currentIndex > 0) {
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+    [arr[currentIndex], arr[randomIndex]] = [
+      arr[randomIndex],
+      arr[currentIndex],
+    ];
+  }
+  return arr;
+}
+
+const pairs = 8;
+
+const data = shuffleArray(makeArr(pairs).concat(makeArr(pairs)));
+
+---
+
+<Memoria>
+  <h1>Memoria</h1>
+  <Grid data={data} />
+</Memoria>
