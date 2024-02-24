@@ -18,6 +18,7 @@ const size = data.length / 4;
           x-data="{flipped: false, cleared: false, }"
           x-bind:class="{'flipped':flipped, 'cleared':cleared}"
           x-on:click="flipCard()"
+          x-bind:style="getRandomOrder()"
         >
           {
             frameworksData.map(icon => (
@@ -40,7 +41,17 @@ const size = data.length / 4;
     let flipped = [];
 
     return {
+      getRandomOrder() {
+        let random = Math.random() * 100;
+        return '--order:'+Math.ceil(random);
+      },
+
       flipCard() {
+        sfxOpen.pause();
+        sfxOpen.currentTime = 0;
+        sfxClear.pause();
+        sfxClear.currentTime = 0;
+        
         if (pair.length < 2) {
           this.flipped = !this.flipped;
           sfxOpen.play();
@@ -78,6 +89,7 @@ const size = data.length / 4;
     border: 1px solid #ccc;
 
     .card {
+      order: var(--order);
       display: flex;
       align-items: center;
       justify-content: center;
