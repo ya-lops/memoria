@@ -1,5 +1,5 @@
 ---
-
+import "@/styles/index.scss";
 ---
 
 <!DOCTYPE html>
@@ -8,8 +8,30 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Memoria</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bungee+Spice&display=swap" rel="stylesheet">
 </head>
+
 <body>
   <slot/>
 </body>
 </html>
+
+<style lang="scss" is:global>
+  html {
+    overflow: clip;
+  }
+
+  body {
+    display: grid;
+    place-items: center;
+    height: 100dvh;
+    background: linear-gradient(hsl(307, 20%, 9%), hsl(241, 52%, 64%));
+
+    font-family: "Bungee Spice", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+    overflow: clip;
+  }
+</style>

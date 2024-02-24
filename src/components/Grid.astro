@@ -1,14 +1,31 @@
 ---
 import frameworksData from "@/data/frameworks.ts";
 
-
 // const pairs = data/2;
 
 const { data } = Astro.props;
 const size = data.length / 4;
 ---
 
-<div class="game" x-data="memoria()">
+<main class="game" x-data="memoria()">
+  <header class="game-header">
+    <h1>memoria</h1>
+
+    <section class="game-complete" x-show="$store.complete">
+      <h2>Congratulations!</h2>
+      <p>
+        You finished the game in <div class="_turns" x-text="$store.turns">
+        </div> turns!
+      </p>
+
+      <a href="/">New game</a>
+    </section>
+
+    <div class="game-turns">
+      <span>Turns: </span>
+      <span class="game-turns" x-text="$store.turns"></span>
+    </div>
+  </header>
   <div class="grid">
     {
       data.map((i) => (
@@ -20,30 +37,35 @@ const size = data.length / 4;
           x-on:click="flipCard()"
           x-bind:style="getRandomOrder()"
         >
-          {
-            frameworksData.map(icon => (
-              icon.id == i.pair ? <img src={icon.href}/> : ''
-            ))
-          }
+          {frameworksData.map((icon) =>
+            icon.id == i.pair ? <img src={icon.href} /> : "",
+          )}
         </div>
       ))
     }
   </div>
-  
-</div>
+</main>
 
 <script is:inline>
   let sfxOpen = new Audio("/sfx/open.wav");
   let sfxClear = new Audio("/sfx/clear.wav");
+  let sfxComplete = new Audio("/sfx/complete.wav");
+
+  document.addEventListener("alpine:init", () => {
+    Alpine.store("turns", 0);
+    Alpine.store("complete", false);
+  });
 
   function memoria() {
+    let pairs = 8;
     let pair = [];
     let flipped = [];
+    let turns = Alpine.store("turns");
 
     return {
       getRandomOrder() {
         let random = Math.random() * 100;
-        return '--order:'+Math.ceil(random);
+        return "--order:" + Math.ceil(random);
       },
 
       flipCard() {
@@ -51,7 +73,7 @@ const size = data.length / 4;
         sfxOpen.currentTime = 0;
         sfxClear.pause();
         sfxClear.currentTime = 0;
-        
+
         if (pair.length < 2) {
           this.flipped = !this.flipped;
           sfxOpen.play();
@@ -63,16 +85,26 @@ const size = data.length / 4;
             flipped = [];
             pair = [];
             sfxClear.play();
+            Alpine.store("turns", turns++);
+            pairs--;
+            console.log("left: " + pairs);
+
+            if (pairs == 0) {
+              console.log("COMPLETE");
+              sfxComplete.play();
+              Alpine.store("complete", true);
+            }
           }
 
           if (pair[0] != pair[1] && pair.length > 1) {
-            console.log('no pair')
+            console.log("no pair");
+            Alpine.store("turns", turns++);
           }
-
         } else {
           flipped.forEach((i) => (i.flipped = false));
           flipped = [];
           pair = [];
+          console.log("reset");
         }
       },
     };
@@ -80,34 +112,121 @@ const size = data.length / 4;
 </script>
 
 <style lang="scss" define:vars={{ size }}>
+  .game {
+    // position: relative;
+    display: grid;
+    grid-template-columns: 100%;
+    gap: 1rem;
+  }
+
+  .game-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+
+  .game-turns {
+    color: #fff;
+    font-family: "Bungee Spice", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+  }
+
+  .game-complete {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    place-content: center;
+    background: black;
+    backdrop-filter: blur(6px);
+    animation: jello-vertical 0.9s both;
+    box-shadow: 0 0 0 100vmax black;
+
+    h2 {
+      font-size: 7vmin;
+      margin-bottom: 3rem;
+    }
+
+    p {
+      font-size: 3vmin;
+    }
+
+    ._turns {
+      font-size: 10vmin;
+    }
+
+    a {
+      margin-top: 3rem;
+      font-size: 8vmin;
+      text-decoration: none;
+      transition: 0.25s;
+      will-change: scale;
+
+      &:hover {
+        scale: 1.1;
+      }
+    }
+
+    @keyframes jello-vertical {
+      0% {
+        transform: scale3d(1, 1, 1);
+      }
+      30% {
+        transform: scale3d(0.75, 1.25, 1);
+      }
+      40% {
+        transform: scale3d(1.25, 0.75, 1);
+      }
+      50% {
+        transform: scale3d(0.85, 1.15, 1);
+      }
+      65% {
+        transform: scale3d(1.05, 0.95, 1);
+      }
+      75% {
+        transform: scale3d(0.95, 1.05, 1);
+      }
+      100% {
+        transform: scale3d(1, 1, 1);
+      }
+    }
+  }
+
   .grid {
+    --color-border: rgba(255, 255, 255, 0.25);
+
     display: inline-grid;
-    grid-template-columns: repeat(var(--size), minmax(32px, 128px));
-    grid-auto-rows: minmax(32px, 128px);
-    background: #ccc;
-    gap: 1px;
-    border: 1px solid #ccc;
+    grid-template-columns: repeat(var(--size), 20vmin);
+    grid-auto-rows: 20vmin;
+    border: 2px solid var(--color-border);
 
     .card {
       order: var(--order);
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #fff;
+      box-shadow: 0 0 0 1px var(--color-border);
       cursor: pointer;
       transition: 0.25s;
       user-select: none;
 
       img {
         opacity: 0;
+        // opacity: 0.5; // DEBUG
+        scale: 0.2;
+        height: 75%;
+        width: 75%;
+        object-fit: contain;
+        transition: 0.25s;
+        user-select: none;
       }
 
-      img {
-        max-width: 75%;
-      }
-
-      &:hover {
-        border: 1px solid red;
+      @media (pointer: fine) {
+        &:hover {
+          z-index: 1;
+        outline: 2px solid orange;
+        }
       }
 
       &.flipped {
@@ -119,6 +238,7 @@ const size = data.length / 4;
 
         img {
           opacity: 1;
+          scale: 1;
         }
       }
 
@@ -126,13 +246,9 @@ const size = data.length / 4;
         pointer-events: none;
 
         img {
-          opacity: .1;
+          opacity: 0.1;
+          scale: 1;
         }
-      }
-
-      &:hover {
-        z-index: 1;
-        outline: 2px solid orange;
       }
     }
   }
