@@ -6,11 +6,6 @@ import alpine from "@astrojs/alpinejs";
 export default defineConfig({
   output: "server",
   adapter: vercel(),
-  compressHTML: true,
-  build: {
-    assets: "assets",
-    inlineStylesheets: "never",
-  },
   integrations: [
     alpine({
       entrypoint: "/src/entrypoint",
