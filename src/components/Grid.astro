@@ -60,7 +60,7 @@ const size = data.length / 4;
     let pairs = 8;
     let pair = [];
     let flipped = [];
-    let turns = Alpine.store("turns");
+    let turns = 0;
 
     return {
       getRandomOrder() {
@@ -74,31 +74,33 @@ const size = data.length / 4;
         sfxClear.pause();
         sfxClear.currentTime = 0;
         
-        
+
         if (pair.length == 2) {
           flipped.forEach((i) => (i.flipped = false));
           flipped = [];
           pair = [];
         }
-        
+
         this.flipped = !this.flipped;
         sfxOpen.play();
 
         if (pair.length < 2) {
           flipped.push(this);
           pair.push(this.$el.dataset.pair);
+          Alpine.store("turns", turns++);
 
           if (pair[0] === pair[1]) {
             flipped.forEach((i) => (i.cleared = true));
             flipped = [];
             pair = [];
             sfxClear.play();
-            Alpine.store("turns", turns++);
             pairs--;
             console.log("left: " + pairs);
+            // Alpine.store("turns", turns++);
+            console.log(turns);
 
             if (pairs == 0) {
-              console.log("COMPLETE");
+              // console.log("COMPLETE");
               sfxComplete.play();
               Alpine.store("complete", true);
             }
@@ -106,13 +108,13 @@ const size = data.length / 4;
 
           if (pair[0] != pair[1] && pair.length > 1) {
             console.log("no pair");
-            Alpine.store("turns", turns++);
+            // Alpine.store("turns", turns++);
           }
         } else {
           flipped.forEach((i) => (i.flipped = false));
           flipped = [];
           pair = [];
-          console.log("reset");
+          // console.log("reset");
         }
       },
     };
@@ -233,7 +235,7 @@ const size = data.length / 4;
       @media (pointer: fine) {
         &:hover {
           z-index: 1;
-        outline: 2px solid orange;
+          outline: 2px solid orange;
         }
       }
 
